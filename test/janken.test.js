@@ -253,11 +253,20 @@ test("SPA: game / profile / stats の 3 パネルが存在する", () => {
   }
 });
 
-test("SPA: nav の id は navGame / navProfile / navStats（nav-xxx ではない）", () => {
-  for (const id of ["navGame", "navProfile", "navStats"]) {
-    assert.match(html, new RegExp(`id="${id}"`), id);
+test("debug mode: 常時2ペイン（左 profile / 右 stats）で nav は無い", () => {
+  assert.match(html, /class="layout"/);
+  assert.match(html, /id="panel-profile" class="panel"/);
+  assert.match(html, /id="panel-stats" class="panel"/);
+  assert.doesNotMatch(html, /id="navGame"/);
+  assert.doesNotMatch(html, /class="nav"/);
+});
+
+test("debug signals deck: id=deck と renderDebug、主要シグナルを持つ", () => {
+  assert.match(html, /id="deck"/);
+  assert.match(html, /function renderDebug/);
+  for (const key of ["session", "phase", "balance", "profile", "events", "predicted", "hand", "confidence", "needsHuman", "tendency"]) {
+    assert.match(html, new RegExp('\\["' + key + '"'), key);
   }
-  assert.doesNotMatch(html, /id="nav-(game|profile|stats)"/);
 });
 
 test("Game: 丸ボタンは グー / チョキ / パー の 3 つで、絵文字を持つ", () => {

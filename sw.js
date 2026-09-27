@@ -1,4 +1,4 @@
-const CACHE_NAME = "janken-pwa-v3";
+const CACHE_NAME = "janken-pwa-v4";
 const ASSETS = ["./","./index.html","./janken.jev.js","./en2ja.js","./manifest.json"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));
