@@ -70,8 +70,11 @@ table{width:100%;border-collapse:collapse;margin-top:16px;font-size:13px}th,td{t
 <script src="./en2ja.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js");}</script>
 <script>
-const {JankenJev,JANKEN_HANDS:HANDS,JANKEN_JUDGE:judgeRound,JANKEN_HUMAN_THRESHOLD:HUMAN_THRESHOLD}=globalThis;
-const ai=new JankenJev({window:6}); const $=id=>document.getElementById(id);
+const Jev=globalThis.JankenJev;
+const HANDS=globalThis.JANKEN_HANDS;
+const judgeRound=globalThis.JANKEN_JUDGE;
+const HUMAN_THRESHOLD=globalThis.JANKEN_HUMAN_THRESHOLD;
+const ai=new Jev({window:6}); const $=id=>document.getElementById(id);
 let round=0,balance=100,profileBalance=0,sessionId=crypto.randomUUID(),jsonl=[];
 const rewardedFields=new Set();
 const profileFields=["age_group","gender","region","handedness","occupation","experience"];
