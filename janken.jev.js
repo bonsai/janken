@@ -1,5 +1,5 @@
 /**
- * janken.jev.js — じゃんけんの手を「判定」で選ぶ。
+ * janken.jev.js — じゃんけんの手を「判定」で選ぶ（古典スクリプト / file:// でも動く）。
  *
  * ★ 乱数を使わない。★ 生成しない。判定だけする（Jev / TypeSafe System One の考え方）。
  *
@@ -15,17 +15,17 @@
  *   const round = await ai.play(playerHand);   // 判定して返す
  */
 
-export const HANDS = ["グー", "チョキ", "パー"];
+const HANDS = ["グー", "チョキ", "パー"];
 
 /** 何に勝つか（型として固定する。ここを外から変えられない） */
-export const BEATS = { グー: "チョキ", チョキ: "パー", パー: "グー" };
-export function judgeRound(a, b) {
+const BEATS = { グー: "チョキ", チョキ: "パー", パー: "グー" };
+function judgeRound(a, b) {
   if (a === b) return "あいこ";
   return BEATS[a] === b ? "勝ち" : "負け";
 }
 
 /** 0.55 未満は「分からない」＝人（あるいは別の判定）に投げる */
-export const HUMAN_THRESHOLD = 0.55;
+const HUMAN_THRESHOLD = 0.55;
 
 function hash(s) {
   let h = 2166136261 >>> 0;
@@ -37,7 +37,7 @@ function hash(s) {
 }
 const unit = (s) => hash(s) / 4294967295;
 
-export class JankenJev {
+class JankenJev {
   /**
    * @param {object} [opt]
    * @param {number} [opt.seed]  固定すると同じ手順になる（検査できる）
@@ -136,5 +136,11 @@ export class JankenJev {
   }
 }
 
-/** Node / ブラウザの両方で使えるように置く */
-if (typeof globalThis !== "undefined") globalThis.JankenJev = JankenJev;
+/** 古典スクリプト（file:// の index.html）と ESM（janken.jev.mjs）の両方から使えるように置く */
+if (typeof globalThis !== "undefined") {
+  globalThis.JankenJev = JankenJev;
+  globalThis.JANKEN_HANDS = HANDS;
+  globalThis.JANKEN_BEATS = BEATS;
+  globalThis.JANKEN_JUDGE = judgeRound;
+  globalThis.JANKEN_HUMAN_THRESHOLD = HUMAN_THRESHOLD;
+}

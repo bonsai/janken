@@ -55,6 +55,22 @@ console.log(x.hand===y.hand ? 'ok 決定的' : 'NG');
 - [x] 同じ履歴・同じ seed で同じ手
 - [x] 履歴が 3 手未満なら「分からない」に落ちる
 
+
+## 戦績と学習（jsonl / ml）
+
+- 戦績は `data/scores.jsonl`（**追記型**。1 行 1 回。壊れた行は捨てる）
+- 癖を見抜く部分は別 repo **`bonsai/jjj`** に分けた（読むだけのエージェント）
+- 学習: `node ml/train.js data/scores.jsonl data/model.json` → 12 次元の softmax（依存なし）
+  - 実測（**ダミーの 24 行**）: `acc 78.3% / baseline 60.9% / samples 23`
+  - **ダミーデータなので、この数字は「学習が動いた」ことしか示さない**
+- `file://` でも動く（`janken.jev.js` は古典スクリプト。Node からは `janken.jev.mjs`）
+
+## サンプル（file:// で開く）
+
+```
+file://wsl$/Ubuntu-24.04/home/sexy/repo/janken/index.html
+```
+
 ## 非目標
 
 - 強い AI（**勝つ**ためではなく、**判定を出す**ため）
