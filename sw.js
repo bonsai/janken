@@ -1,4 +1,4 @@
-const CACHE_NAME = "janken-pwa-v2";
+const CACHE_NAME = "janken-pwa-v3";
 const ASSETS = ["./","./index.html","./janken.jev.js","./en2ja.js","./manifest.json"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));
@@ -12,5 +12,20 @@ self.addEventListener("activate", event => {
   );
 });
 self.addEventListener("fetch", event => {
-  event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request)));
+  const req = event.request;
+  // Navigation: network-first so a new deploy is picked up immediately.
+  if (req.mode === "navigate") {
+    event.respondWith(
+      fetch(req)
+        .then(res => {
+          const copy = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
+          return res;
+        })
+        .catch(() => caches.match(req))
+    );
+    return;
+  }
+  // Others: cache-first.
+  event.respondWith(caches.match(req).then(cached => cached || fetch(req)));
 });

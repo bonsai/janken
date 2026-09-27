@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#1B2A4A"><link rel="manifest" href="./manifest.json">
+<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#1B2A4A"><link rel="manifest" href="./manifest.json"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='88'%3E%E2%9C%8A%3C/text%3E%3C/svg%3E">
 <title>janken.jev.js — POC</title>
 <style>
 :root{--bg:#1B2A4A;--ink:#FFF8E7;--pink:#FF5AAA;--cyan:#5AE6F0;--dim:#8A9BB8}
@@ -102,6 +102,7 @@ table{width:100%;border-collapse:collapse;margin-top:16px;font-size:13px}th,td{t
 <script src="./en2ja.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js");}</script>
 <script>
+(function(){
 const Jev=globalThis.JankenJev;
 const HANDS=globalThis.JANKEN_HANDS;
 const judgeRound=globalThis.JANKEN_JUDGE;
@@ -249,6 +250,7 @@ document.querySelectorAll(".hand").forEach(b=>b.addEventListener("click",()=>pla
 setHandsEnabled(false);
 updateBalance();
 renderStats();
+})();
 </script>
 </body>
 </html>
