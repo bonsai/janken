@@ -67,6 +67,7 @@ table{width:100%;border-collapse:collapse;margin-top:16px;font-size:13px}th,td{t
 </main>
 <script src="./janken.jev.js"></script>
 <script src="./en2ja.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js");}</script>
 <script>
 const {JankenJev,JANKEN_HANDS:HANDS,JANKEN_JUDGE:judgeRound,JANKEN_HUMAN_THRESHOLD:HUMAN_THRESHOLD}=globalThis;
 const ai=new JankenJev({window:6}); const $=id=>document.getElementById(id);
