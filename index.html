@@ -27,7 +27,7 @@ table{width:100%;border-collapse:collapse;margin-top:16px;font-size:13px}th,td{t
 <h1>janken.jev.js</h1>
 <p class="lead">SPA PWA: profile → game → behavior data.</p>
 
-<nav class="nav" aria-label="App navigation">
+<nav class="nav hidden" id="appNav" aria-label="App navigation">
 <button id="navGame" class="active">Game</button>
 <button id="navProfile">Profile</button>
 </nav>
@@ -47,6 +47,7 @@ table{width:100%;border-collapse:collapse;margin-top:16px;font-size:13px}th,td{t
 <div class="scores" id="scores"></div>
 <table><thead><tr><th>#</th><th>You</th><th>AI</th><th>Result</th><th>Local tendency</th></tr></thead><tbody id="log"></tbody></table>
 <button id="continue" class="primary hidden">Continue +10 rounds</button>
+<button id="profileAfterGame" class="primary hidden">Answer profile +¥100 each</button>
 </section>
 
 <section id="profilePanel" class="panel hidden">
@@ -60,7 +61,7 @@ table{width:100%;border-collapse:collapse;margin-top:16px;font-size:13px}th,td{t
 <div class="field"><label>Experience</label><select id="experience"><option value="">—</option><option value="beginner">Beginner</option><option value="casual">Casual</option><option value="experienced">Experienced</option></select></div>
 </div>
 <div class="earn-progress"><span id="profileProgress">0/6</span><span>max ¥600</span></div>
-<button id="start" class="primary" disabled>Start game</button>
+<button id="start" class="primary">Start game</button>
 </section>
 
 <footer>POC is frontend-only. Data stays in the browser for now. API, ads, and BQML are next.</footer>
@@ -71,7 +72,7 @@ table{width:100%;border-collapse:collapse;margin-top:16px;font-size:13px}th,td{t
 <script>
 const {JankenJev,JANKEN_HANDS:HANDS,JANKEN_JUDGE:judgeRound,JANKEN_HUMAN_THRESHOLD:HUMAN_THRESHOLD}=globalThis;
 const ai=new JankenJev({window:6}); const $=id=>document.getElementById(id);
-let round=0,balance=0,profileBalance=0,sessionId=crypto.randomUUID(),jsonl=[];
+let round=0,balance=100,profileBalance=0,sessionId=crypto.randomUUID(),jsonl=[];
 const rewardedFields=new Set();
 const profileFields=["age_group","gender","region","handedness","occupation","experience"];
 
@@ -91,6 +92,7 @@ function updateProfileReward(field){
   append({event:"profile_field",field,value,reward:100,currency:"jpy",profile_balance:profileBalance});
 }
 function startGame(){
+  showView("game");
   const profile=Object.fromEntries(profileFields.map(k=>[k,$(k).value]).filter(([,v])=>v));
   append({event:"profile",profile,profile_field_count:Object.keys(profile).length});
   $("profilePanel").classList.add("hidden"); $("gamePanel").classList.remove("hidden");
@@ -113,9 +115,20 @@ function play(you){
   ai.observe(you);
   const t=ai.tendency(),tr=document.createElement("tr"); tr.innerHTML='<td>'+round+'</td><td>'+en2ja(you)+'</td><td>'+en2ja(d.hand)+'</td><td>'+en2ja(res==="勝ち"?"win":"lose")+'</td><td class="reason">'+HANDS.map(h=>en2ja(h)+":"+pct(t[h])).join(" ")+"</td>"; $("log").prepend(tr);
   append({event:"round",round,attempt:1,player_hand:you,ai_hand:d.hand,result:res==="勝ち"?"win":"lose",stake:10,payout:res==="勝ち"?20:0,balance});
-  if(round>=10){document.querySelectorAll(".hand").forEach(b=>b.disabled=true);$("continue").classList.remove("hidden");}
+  if(round>=10){
+    document.querySelectorAll(".hand").forEach(b=>b.disabled=true);
+    $("continue").classList.remove("hidden");
+    $("profileAfterGame").classList.remove("hidden");
+  }
 }
-function continueGame(){round=0;document.querySelectorAll(".hand").forEach(b=>b.disabled=false);$("continue").classList.add("hidden");$("rounds").textContent="0";append({event:"continue_offer",rounds:10});}
+function continueGame(){
+  round=0;
+  document.querySelectorAll(".hand").forEach(b=>b.disabled=false);
+  $("continue").classList.add("hidden");
+  $("profileAfterGame").classList.add("hidden");
+  $("rounds").textContent="0";
+  append({event:"continue_offer",rounds:10});
+}
 profileFields.forEach(field => $(field).addEventListener("change", () => updateProfileReward(field)));
 $("start").addEventListener("click",startGame);$("continue").addEventListener("click",continueGame);
 document.querySelectorAll(".hand").forEach(b=>b.addEventListener("click",()=>play(b.dataset.hand)));
