@@ -1,0 +1,9 @@
+{
+  "name": "Janken Jev",
+  "short_name": "Janken",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#1B2A4A",
+  "theme_color": "#1B2A4A",
+  "description": "Janken behavior experiment PWA"
+}
