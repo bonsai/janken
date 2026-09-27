@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>janken.jev.js — 判定で選ぶじゃんけん</title>
+<style>
+  :root { --bg:#1B2A4A; --ink:#FFF8E7; --pink:#FF5AAA; --cyan:#5AE6F0; --dim:#8A9BB8; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.6 system-ui,sans-serif; }
+  main { max-width:720px; margin:0 auto; padding:24px 16px 64px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  p.lead { color:var(--dim); margin:0 0 20px; font-size:13px; }
+  .hands { display:flex; gap:12px; margin:16px 0 24px; }
+  button.hand { flex:1; padding:20px 8px; font-size:18px; border:2px solid var(--dim); border-radius:12px;
+                background:transparent; color:var(--ink); cursor:pointer; }
+  button.hand:hover { border-color:var(--cyan); }
+  button.hand:active { transform:translateY(1px); }
+  .row { display:flex; gap:16px; align-items:center; margin:8px 0; }
+  .row .k { width:72px; color:var(--dim); font-size:13px; }
+  .big { font-size:28px; font-weight:700; }
+  .bar { height:8px; background:#0f1a2e; border-radius:4px; flex:1; overflow:hidden; }
+  .bar > i { display:block; height:100%; background:var(--cyan); }
+  .reason { color:var(--dim); font-size:13px; }
+  .need { color:var(--pink); font-size:13px; }
+  .scores { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px; }
+  .score { border:1px solid #2b3d63; border-radius:10px; padding:8px 10px; font-size:13px; }
+  .score b { display:block; font-size:18px; }
+  table { width:100%; border-collapse:collapse; margin-top:16px; font-size:13px; }
+  th,td { text-align:left; padding:6px 4px; border-bottom:1px solid #2b3d63; }
+  th { color:var(--dim); font-weight:400; }
+  footer { color:var(--dim); font-size:12px; margin-top:24px; }
+  code { background:#0f1a2e; padding:1px 5px; border-radius:4px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>janken.jev.js</h1>
+  <p class="lead">乱数を使わない。相手の癖を<strong>判定</strong>して手を選ぶ（Choice / Score / Noul）。</p>
+
+  <div class="hands">
+    <button class="hand" data-hand="グー">グー</button>
+    <button class="hand" data-hand="チョキ">チョキ</button>
+    <button class="hand" data-hand="パー">パー</button>
+  </div>
+
+  <div class="row"><span class="k">あなた</span><span class="big" id="you">—</span>
+    <span class="k" style="width:auto">AI</span><span class="big" id="ai">—</span>
+    <span class="big" id="result" style="margin-left:auto">—</span></div>
+
+  <div class="row"><span class="k">判定</span><span class="reason" id="reason">—</span></div>
+  <div class="row"><span class="k">確信</span><span class="bar"><i id="confbar" style="width:0%"></i></span><span id="conf">0.00</span></div>
+  <div class="row"><span class="k"></span><span class="need" id="need"></span></div>
+
+  <div class="scores" id="scores"></div>
+
+  <table>
+    <thead><tr><th>#</th><th>あなた</th><th>AI</th><th>結果</th><th>相手の癖（直近）</th></tr></thead>
+    <tbody id="log"></tbody>
+  </table>
+
+  <footer>
+    判定器: <code>JankenJev</code>（依存なし・決定的）。<br>
+    確信が <code>0.55</code> 未満なら「分からない」として相手に投げる設計（今は引く手を選ぶ）。<br>
+    API を使っていない。鍵も要らない。
+  </footer>
+</main>
+
+<script type="module">
+import { JankenJev, judgeRound, HANDS, HUMAN_THRESHOLD } from "./janken.jev.js";
+
+const ai = new JankenJev({ seed: 0, window: 6 });
+const $ = (id) => document.getElementById(id);
+let round = 0;
+
+function pct(v) { return Math.round(v * 100) + "%"; }
+
+function renderScores(scores) {
+  $("scores").innerHTML = HANDS.map((h) => `
+    <div class="score">相手が ${scores ? "" : ""}</div>`).join("");
+  $("scores").innerHTML = HANDS.map((h) =>
+    `<div class="score"><span class="reason">${h}</span><b>${(scores?.[h] ?? 0).toFixed(2)}</b></div>`).join("");
+}
+
+function play(you) {
+  // 1. AI が判定する（あなたの直前の手も材料にする）
+  const prev = ai.history.length ? ai.history[ai.history.length - 1] : null;
+  const d = ai.play(prev);
+
+  // 2. 結果
+  const res = judgeRound(you, d.hand);
+  round++;
+
+  $("you").textContent = you;
+  $("ai").textContent = d.hand;
+  $("result").textContent = res;
+  $("result").style.color = res === "勝ち" ? "#FF5AAA" : res === "負け" ? "#5AE6F0" : "#FFF8E7";
+  $("reason").textContent = d.reason;
+  $("conf").textContent = d.confidence.toFixed(2);
+  $("confbar").style.width = pct(d.confidence);
+  $("need").textContent = d.needsHuman ? `確信が ${HUMAN_THRESHOLD} 未満。分からないので引きました` : "";
+  renderScores(d.scores);
+
+  // 3. 材料を足す（あなたの手を観測）
+  ai.observe(you);
+
+  const t = ai.tendency();
+  const tend = HANDS.map((h) => `${h}:${pct(t[h])}`).join(" ");
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td>${round}</td><td>${you}</td><td>${d.hand}</td><td>${res}</td><td class="reason">${tend}</td>`;
+  $("log").prepend(tr);
+}
+
+document.querySelectorAll("button.hand").forEach((b) =>
+  b.addEventListener("click", () => play(b.dataset.hand)));
+</script>
+</body>
+</html>
