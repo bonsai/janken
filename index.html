@@ -119,10 +119,11 @@ const profileFields=["age_group","gender","region","handedness","occupation","ex
 
 function append(event){jsonl.push(JSON.stringify({...event,session_id:sessionId,timestamp:new Date().toISOString()}));}
 function pct(v){return Math.round(v*100)+"%";}
+const NAV_ID={game:"navGame",profile:"navProfile",stats:"navStats"};
 function showView(name){
   for(const v of ["game","profile","stats"]){
     $("panel-"+v).classList.toggle("hidden", v!==name);
-    $("nav-"+v).classList.toggle("active", v===name);
+    $(NAV_ID[v]).classList.toggle("active", v===name);
   }
 }
 function setHandsEnabled(on){document.querySelectorAll(".hand").forEach(b=>b.disabled=!on);}
