@@ -66,28 +66,23 @@
   </footer>
 </main>
 
-<script type="module">
-import { JankenJev, judgeRound, HANDS, HUMAN_THRESHOLD } from "./janken.jev.js";
-
-const ai = new JankenJev({ seed: 0, window: 6 });
+<script src="./janken.jev.js"></script>
+<script>
+const { JankenJev, JANKEN_HANDS: HANDS, JANKEN_JUDGE: judgeRound, JANKEN_HUMAN_THRESHOLD: HUMAN_THRESHOLD } = globalThis;
+const ai = new JankenJev({ window: 6 });
 const $ = (id) => document.getElementById(id);
 let round = 0;
 
 function pct(v) { return Math.round(v * 100) + "%"; }
 
 function renderScores(scores) {
-  $("scores").innerHTML = HANDS.map((h) => `
-    <div class="score">相手が ${scores ? "" : ""}</div>`).join("");
   $("scores").innerHTML = HANDS.map((h) =>
-    `<div class="score"><span class="reason">${h}</span><b>${(scores?.[h] ?? 0).toFixed(2)}</b></div>`).join("");
+    `<div class="score"><span class="reason">${h}</span><b>${(scores?.[h] ?? 0).toFixed(2)}</b></div>`
+  ).join("");
 }
 
 function play(you) {
-  // 1. AI が判定する（あなたの直前の手も材料にする）
-  const prev = ai.history.length ? ai.history[ai.history.length - 1] : null;
-  const d = ai.play(prev);
-
-  // 2. 結果
+  const d = ai.play();
   const res = judgeRound(you, d.hand);
   round++;
 
@@ -98,12 +93,10 @@ function play(you) {
   $("reason").textContent = d.reason;
   $("conf").textContent = d.confidence.toFixed(2);
   $("confbar").style.width = pct(d.confidence);
-  $("need").textContent = d.needsHuman ? `確信が ${HUMAN_THRESHOLD} 未満。分からないので引きました` : "";
+  $("need").textContent = d.needsHuman ? `確信が ${HUMAN_THRESHOLD} 未満。分からない` : "";
   renderScores(d.scores);
 
-  // 3. 材料を足す（あなたの手を観測）
   ai.observe(you);
-
   const t = ai.tendency();
   const tend = HANDS.map((h) => `${h}:${pct(t[h])}`).join(" ");
   const tr = document.createElement("tr");
