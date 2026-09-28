@@ -76,7 +76,7 @@ console.log(x.hand===y.hand ? 'ok 決定的' : 'NG');
 ## サンプル（file:// で開く）
 
 ```
-file://wsl$/Ubuntu-24.04/home/sexy/repo/janken/index.html
+file://wsl$/Ubuntu-24.04/home/sexy/.skills/janken/index.html
 ```
 
 ## 非目標
