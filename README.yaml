@@ -1,0 +1,35 @@
+name: janken
+summary: "じゃんけんを使った行動データ収集実験"
+
+topics:
+  - ai
+  - data
+  - game
+
+status: prototype
+
+purpose:
+  - "ゲームとして遊べる"
+  - "行動データを収集する"
+
+skills:
+  - product_design
+  - web
+  - data
+
+read:
+  human: README.md
+  demo: index.html
+  source: .
+
+stats:
+  commits: auto
+  files: auto
+  languages: auto
+
+portfolio:
+  featured: true
+  roles:
+    - ai
+    - product_design
+    - data
